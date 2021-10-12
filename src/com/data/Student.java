@@ -12,12 +12,19 @@ import java.io.Serializable;
  * @author ADMIN
  */
  class Student implements Serializable{
-     String sID, sName;
+     protected String sID, sName;
 
     public Student(String ID, String name) {
         this.sID = ID;
         this.sName = name;
     }
+
+    public Student(String sID) {
+        this.sID = sID;
+    }
+    
+   
+    
 
     @Override
     public String toString() {
@@ -33,8 +40,10 @@ import java.io.Serializable;
     }
 
     public String getsName() {
+        
         return sName;
     }
+   
 
     public void setsName(String sName) {
         this.sName = sName;

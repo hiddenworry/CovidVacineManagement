@@ -11,9 +11,12 @@ import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import uti.menu.Menu;
 import util.InputHandler;
+import util.MD5Encrytion;
 
 /**
  *
@@ -21,88 +24,81 @@ import util.InputHandler;
  */
 public class VaccinationList extends ArrayList<Injection> {
 
-    StudentList stList = new StudentList();
+    private final String DATABASE_DIR = System.getProperty("user.dir");
+    private final String Injectionfile_dir = DATABASE_DIR + "\\Database\\InjectionList\\Injection.dat";
+    StudentList StList = new StudentList();
     VacineList VacList = new VacineList();
-    final String DATABASE_DIR = System.getProperty("user.dir");
-    // đường dẫn chính để lưu các file dữ liệu
-    String Injectionfile_dir = DATABASE_DIR + "\\Database\\InjectionList\\Injection.dat";
-// gọi contructor sẽ gọi hàm loadFromfile để add những đối tượng học sinh đã tim chủng trước đó vào danh sach 
 
     public VaccinationList() {
-        loadFromFile(Injectionfile_dir);
+        loadFromFile();
     }
 
-    // đường dẫn để add danh sách các sinh viên đã tiêm chủng vào list để tiện sử lý
-    private void loadFromFile(String file) {
+    private void loadFromFile() {
         try {
-            FileInputStream fis = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(Injectionfile_dir);
             ObjectInputStream ois = new ObjectInputStream(fis);
             while (fis.available() > 0) {
-                Injection tmp = (Injection) ois.readObject();
-                VaccinationList.super.add(tmp);
+                VaccinationList.super.add((Injection) ois.readObject());
+
             }
-            ois.close();
             fis.close();
-        } catch (IOException | ClassNotFoundException e) {
+            ois.close();
+        } catch (Exception e) {
 
         }
-    }
-// được sử dụng ở hàm nhập để tránh duplicated, phục vụ cho add
 
-    private String getInjectionID() {
+    }
+
+    private String getInjection() {
+        Injection I;
         String ID;
         do {
-            ID = InputHandler.getString("Enter injection ID: ", "Please make sure you injection id is not empty!!!", 10);
-            if (searchInjectionByID(ID) == null) {
+            ID = InputHandler.getString("Enter Injection ID: ", "Please make sure your input is not empty");
+            I = searchInjectionByID(ID);
+            if (I == null) {
                 return ID;
             } else {
-                System.out.println("This Id already in the list, please try another");
+                System.out.println("This InJection has been created before!!!");
             }
+
         } while (true);
 
     }
 
-// hàm này có chức năng xử lý khi add một thông tin tiêm chủng mới, gọi hàm getStuDose() để lấy đước số muỗi tiêm
-// của 1 đối tượng tương ứng được truyền vào    
-    // có 3 trường hợp:
-    // Sinh viên đã tiêm 0 mũi : thì gọi hàm  addInjection(Sid) để nhập thpngo tin tiêm chủng bình thường
-    // sinh viên tiêm 1 mũi thì gọi hàm updateInjection(Injection I) để update thông tin tiêm muỗi 2
-    // Sinh viên đã tiêm đủ 2 mũi thì sẽ hiển thông báo và thoát
     public void addStuInjection() {
-        String Sid;
-        Sid = stList.getStuID();
+        String Sid = StList.getStuID();
         Injection I = searchStuBySid(Sid);
-
         if (I == null) {
             addInjection(Sid);
-        } else if (I.getDoses() == 1) {
-            System.out.println("This student have been inject the first dose \n" + VacList.searchVacineByID(I.vID) + " at " + I.getD1());
-            if (Menu.ContinueMessage("Do you want to add the second one")) {
+        } else if (I != null && I.getDoses() == 1) {
+            System.out.println("this student has had 1 injection of" + I.toString());
+            if (Menu.ContinueMessage(" Do you want ot continues input the 2nd one")) {
                 updateInjection(I);
             }
+
         } else {
             System.out.println("This student has had 2 injections");
         }
 
+        writetoFile(Injectionfile_dir);
     }
-// dùng để add thông tin tiêm chủng của một sinh viên có trong danh sách sinh viên
 
     private void addInjection(String Sid) {
-        String ID, Vid, place1, d1, place2, d2;
-        Injection I;
-        ID = getInjectionID();
+        String ID, Vid, place1, date1, place2, date2;
+        ID = getInjection();
         Vid = VacList.getVacID();
-        place1 = InputHandler.getString("Where was the first injection: ", "Sorry, make sure your input is not empty");
-        d1 = InputHandler.checkDate1stDose("Enter the date of the 1st dose[dd/MM/yyyy]: ", "Invalid date, please input the a valid date(the date must after 2020)");
-        if (Menu.ContinueMessage("Do you want to add the second injection?")) {
-            place2 = InputHandler.getString("Where was the seconds dose: ", "Sorry, make sure your input is not empty");
-            d2 = InputHandler.checkDate2ndDose(d1, "Enter the date of 2nd dose[dd/MM/yyyy]: ", "Invalid date, the 2nd dose must be inject after 4-12 week after the first one");
-            I = new Injection(ID, Sid, Vid, place1, d1, place2, d2);
+        place1 = InputHandler.getString("Enter the first places of 1st Injection", "Make sure your input is not empty");
+        date1 = InputHandler.checkDate1stDose("Enter the date of 1st dose:", "Make sure you enter corect date(must after 2019)");
+        if (Menu.ContinueMessage("Do you want to input the 2nd injection inform")) {
+            place2 = InputHandler.getString("Enter the first places of 2nd Injection", "Make sure your input is not empty");
+            date2 = InputHandler.checkDate2ndDose(date1, "Enter the first places of 2nd Injection", "please make sure the 2nd dose after first 4-12 week!!");
+            VaccinationList.super.add(new Injection(ID, Sid, Vid, place1, date1, place2, date2));
+            writetoFile(Injectionfile_dir);
         } else {
-            I = new Injection(ID, Sid, Vid, place1, d1);
+            VaccinationList.super.add(new Injection(ID, Sid, Vid, place1, date1));
+            writetoFile(Injectionfile_dir);
+
         }
-        VaccinationList.super.add(I);
-        writetoFile(Injectionfile_dir);
 
     }
 
@@ -112,15 +108,14 @@ public class VaccinationList extends ArrayList<Injection> {
         Injection I = searchInjectionByID(Id);
         if (I != null) {
             System.out.println("Before update");
-             System.out.printf("%5s|%15s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
+            System.out.printf("%5s|%25s|%30s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "SName", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
             I.showInfor();
             System.out.println("Remember that you only permit to change the 2nd injection of the student");
             updateInjection(I);
             System.out.println("Update successfully");
             System.out.println("Student has completed 2 injections!");
-            System.out.printf("%5s|%15s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
+            System.out.printf("%5s|%15s|%40s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "SName", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
             I.showInfor();
-            
 
         } else {
             System.out.println("Injection does not exist");
@@ -158,11 +153,33 @@ public class VaccinationList extends ArrayList<Injection> {
         return null;
     }
 // hàm này có chức năng ghi các đối tượng trong InjectionList vào file
-    public void saveToFile(){
+
+    public void saveToFile() throws UnsupportedEncodingException, NoSuchAlgorithmException {
         writetoFile(Injectionfile_dir);
         System.out.println(Injectionfile_dir);
-    
+
     }
+
+    public void encrypt() throws NoSuchAlgorithmException {
+
+        String Encrypt_dir = DATABASE_DIR + "\\Database\\InjectionList\\Encrypt\\InjectEncrypted.dat";
+        try {
+            FileOutputStream fos = new FileOutputStream(Encrypt_dir);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            for (Injection I : this) {
+                oos.writeObject(MD5Encrytion.encrypt(I));
+            }
+
+            oos.close();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Write failed");
+        } catch (IOException ex) {
+            System.out.println("Write failed");
+        }
+
+    }
+
     private void writetoFile(String fileName) {
         try {
             FileOutputStream fos = new FileOutputStream(fileName);
@@ -176,16 +193,14 @@ public class VaccinationList extends ArrayList<Injection> {
         } catch (FileNotFoundException ex) {
             System.out.println("Write failed");
         } catch (IOException ex) {
-
+            System.out.println("Write failed");
         }
 
     }
 
     public void showInjectedList() {
-        System.out.printf("%5s|%15s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
-        for (Injection Injected : this) {
-            Injected.showInfor();
-        }
+
+        printInjectionList(this);
 
     }
 
@@ -198,23 +213,53 @@ public class VaccinationList extends ArrayList<Injection> {
             System.out.println("Remove succesfully!!!!");
             writetoFile(Injectionfile_dir);
         } else if (I == null) {
-            System.out.println("This ID is not in the InjectionList");
+            System.out.println("Injection does not exist");
         } else {
             System.out.println("Remove failed");
         }
 
     }
 
-    public void searchStuByID() {
+    public void searchInjectedStuBySid() {
         String Sid = InputHandler.getString("Enter the student id that you want to search", "Make sure you input is not empty");
         Injection I = searchStuBySid(Sid);
         if (I != null) {
-            System.out.printf("%5s|%15s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
+            System.out.printf("%5s|%25s|%30s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "SName", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
             I.showInfor();
         } else {
-            System.out.println("This student is not in the Injection list");
+            System.out.println("Not found!!!");
         }
 
+    }
+
+    private ArrayList<Injection> searchInjectedStubyName(String Sname) {
+        ArrayList<Injection> nameList = new ArrayList<>();
+        for (Injection I : this) {
+            if (I.getsName().equalsIgnoreCase(Sname)) {
+                nameList.add(I);
+            }
+
+        }
+
+        return nameList;
+    }
+
+    public void searchInjectedStubyName() {
+        String Sname = InputHandler.getString("Enter the student name that you want to search", "Please make sure your input is not empty!!!");
+        ArrayList<Injection> nameList = searchInjectedStubyName(Sname);
+        if (!nameList.isEmpty()) {
+            printInjectionList(nameList);
+        } else {
+            System.out.println("Not found!!!");
+        }
+
+    }
+
+    private void printInjectionList(ArrayList<Injection> Ilist) {
+        System.out.printf("%5s|%25s|%30s|%15s|%30s|%30s|%30s|%30s|\n", "ID", "SID", "SName", "VID", "Date of first injection", "Place of 1st injection", "Date of second injection", "Place of 2nd injection");
+        for (Injection injection : Ilist) {
+            injection.showInfor();
+        }
     }
 
 }

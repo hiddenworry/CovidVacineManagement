@@ -11,9 +11,10 @@ import java.io.Serializable;
  *
  * @author ADMIN
  */
- class Injection implements Serializable {
+class Injection implements Serializable {
 
-    String ID, sID, vID;
+    StudentList stu = new StudentList();
+    String ID, vID, sID, sName;
     String place1;
     String d1;
     String place2;
@@ -21,22 +22,30 @@ import java.io.Serializable;
 
     public Injection(String ID, String sID, String vID, String place1, String d1, String place2, String d2) {
         this.ID = ID;
-        this.sID = sID;
         this.vID = vID;
+        this.sID = sID;
+        this.sName = stu.getNamebyID(sID);
         this.place1 = place1;
         this.d1 = d1;
         this.place2 = place2;
         this.d2 = d2;
     }
 
-   
-
     public Injection(String ID, String sID, String vID, String place1, String d1) {
         this.ID = ID;
-        this.sID = sID;
         this.vID = vID;
+        this.sID = sID;
+        this.sName = stu.getNamebyID(sID);
         this.place1 = place1;
         this.d1 = d1;
+    }
+
+    public String getsName() {
+        return sName;
+    }
+
+    public void setsName(String sName) {
+        this.sName = sName;
     }
 
     public String getID() {
@@ -97,20 +106,22 @@ import java.io.Serializable;
 
     @Override
     public String toString() {
-        return "Injection{" + "ID=" + ID + ", sID=" + sID + ", vID=" + vID + ", place1=" + place1 + ", d1=" + d1 + ", place2=" + place2 + ", d2=" + d2 + '}';
+        return "Injection{ ID=" + ID + ", vID=" + vID + ", sID=" + sID + ", sName=" + sName + ", place1=" + place1 + ", d1=" + d1 + ", place2=" + place2 + ", d2=" + d2 + '}';
     }
 
     public void showInfor() {
 
-        System.out.printf("%5s|%15s|%15s|%30s|%30s|%30s|%30s|\n", ID, sID, vID, d1, place1, d2, place2);
+        System.out.printf("%5s|%25s|%30s|%15s|%30s|%30s|%30s|%30s|\n", ID, sID, sName, vID, d1, place1, d2, place2);
 
     }
 
     // hàm này trả về số mũi tiêm của Sinh Viên trong đối tượng injection
     int getDoses() {
-       if(this.getD2() == null)
-           return 1;
-       else return 2;
+        if (this.getD2() == null) {
+            return 1;
+        } else {
+            return 2;
+        }
     }
 
 }

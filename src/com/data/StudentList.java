@@ -5,8 +5,6 @@
  */
 package com.data;
 
-
-
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -17,21 +15,22 @@ import util.InputHandler;
  *
  * @author ADMIN
  */
- class StudentList extends ArrayList<Student> {
+class StudentList extends ArrayList<Student> {
 
     final String dir = System.getProperty("user.dir") + "\\Database\\StudentList\\StList.dat";
 
     // đường dẫn lưu file StList.dat có sẵn
     public StudentList() {
         addData();
-       
+
     }
+
     Student searchStudentByID(String ID) {
         for (Student St : this) {
-            if(St.getsID().equalsIgnoreCase(ID)){
+            if (St.getsID().equalsIgnoreCase(ID)) {
                 return St;
             }
-              
+
         }
         return null;
 
@@ -44,11 +43,11 @@ import util.InputHandler;
             fos = new FileOutputStream(dir);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             StudentList.super.add(new Student("SE0000", "Nguyen Le"));
-           StudentList.super.add(new Student("SE0001", "Nguyen Tran"));
+            StudentList.super.add(new Student("SE0001", "Nguyen Tran"));
             StudentList.super.add(new Student("SE0002", "Nguyen Hoang Le"));
             StudentList.super.add(new Student("SE0003", "Nguyen Hoang Anh"));
             StudentList.super.add(new Student("SE0004", "Nguyen Hoang Cao"));
-           StudentList.super.add(new Student("SE0005", "Le Van Quang"));
+            StudentList.super.add(new Student("SE0005", "Le Van Quang"));
             StudentList.super.add(new Student("SE0006", "Trinh Binh Minh"));
             StudentList.super.add(new Student("SE0007", "Nguyen Quoc Bao"));
             StudentList.super.add(new Student("SE0008", "Le Minh Thuan"));
@@ -56,22 +55,21 @@ import util.InputHandler;
             StudentList.super.add(new Student("SE0010", "Le Chi Thanh"));
             StudentList.super.add(new Student("SE0011", "Nguyen Gia Bao"));
             for (Student StList : this) {
-                
+
                 oos.writeObject(StList);
             }
         } catch (Exception e) {
-            
 
         }
-        
+
     }
-    
-     String getStuID() {
+
+    String getStuID() {
         String Sid;
 
         do {
             Sid = InputHandler.getString("Enter Student ID[Example SE0001]:", "Sorry, make sure your input is not empty");
-            if ( searchStudentByID(Sid) != null ) {
+            if (searchStudentByID(Sid) != null) {
                 return Sid;
             } else {
                 System.out.println("This student is not in the school!!!");
@@ -81,5 +79,14 @@ import util.InputHandler;
 
     } // check mssv hợp lệ và có tồn tại trong danh sách
 
-    
+    String getNamebyID(String id) {
+        for (Student Stu : this) {
+            if (Stu.getsID().equalsIgnoreCase(id)) {
+                return Stu.getsName();
+            }
+
+        }
+        return null;
+    }
+
 }

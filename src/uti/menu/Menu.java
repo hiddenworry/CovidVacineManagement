@@ -48,7 +48,7 @@ public class Menu {
     }
 
     public int getChoice() {
-        return  InputHandler.getAnInteger("You are going to enter value from 1 to " + this.Options.size() , "Invalid choice, please input again", 1, 6);
+        return  InputHandler.getAnInteger("You are going to enter value from 1 to " + this.Options.size() , "Invalid choice, please input again", 1, this.Options.size());
     }
     // Hàm getChoice giúp sử dung hàm getANumber trong lớp InputHandler thuộc package util
     // hàm này sẽ trả về giá trị kiểu số nguyên tương ứng trong khoản số option mà người dùng đã thêm

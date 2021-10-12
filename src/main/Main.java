@@ -7,6 +7,8 @@ package main;
 
 import com.data.VaccinationList;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import uti.menu.Menu;
 
 /**
@@ -15,7 +17,7 @@ import uti.menu.Menu;
  */
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // tạo một đối tượng Menu có tên là optionList và thêm vào 5 options và Titile
         int Choice;
         VaccinationList StVacList = new VaccinationList();
@@ -26,7 +28,9 @@ public class Main {
         OptionList.addOptions("3. Updating information of students' vaccine injection");
         OptionList.addOptions("4. Delete student vaccine injection information");
         OptionList.addOptions("5. Search for injection information by studentID");
-        OptionList.addOptions("6. Quit");
+        OptionList.addOptions("6. Store Injection List to file");
+        OptionList.addOptions("7. Encrypt Injection List and save to file");
+        
         Menu submenu = new Menu("What do you want?");
         submenu.addOptions("1.Enter only the first injection");
         submenu.addOptions("2.Enter both injections");
@@ -53,20 +57,31 @@ public class Main {
                          StVacList.deleteInjection();
                     break;
                 case 5:
-                        StVacList.searchStuByID();
+                        Menu searchMenu = new Menu("What information that you want to search");
+                        searchMenu.addOptions("1. Search by ID");
+                        searchMenu.addOptions("2. search by student name");
+                        searchMenu.printMenu();
+                        if(searchMenu.getChoice() == 1)
+                            StVacList.searchInjectedStuBySid();
+                           
+                        else
+                             StVacList.searchInjectedStubyName();
                     break;
                 case 6:
                     System.out.println("Goodbye!!!");
                     StVacList.saveToFile();
                     break;
-                default:
+                case 7:
+                    StVacList.encrypt();
                     //System.out.println("Please enter a valid choice!!!!");
                    
                     break;
+                
+                    
 
             }
 
-        } while (Choice != 6);
+        } while (Choice != 7 && Choice !=6);
 
     }
 }
